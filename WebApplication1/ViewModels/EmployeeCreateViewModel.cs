@@ -10,8 +10,6 @@ namespace EmployeeManagement.ViewModels
 {
     public class EmployeeCreateViewModel
     {
-        public int Id { get; set; }
-
         [Required]
         [MaxLength(50, ErrorMessage = "Name cannot be more than 50 characters")]
         public string Name { get; set; }

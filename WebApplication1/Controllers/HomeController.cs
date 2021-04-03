@@ -103,14 +103,7 @@ namespace EmployeeManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                string uniqueFileName = null;
-                if (model.Photo != null)
-                {
-                    string uploadFolder = Path.Combine(_hostingEnvironment.WebRootPath, "images");
-                    uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Photo.FileName;
-                    string filePath = Path.Combine(uploadFolder, uniqueFileName);
-                    model.Photo.CopyToAsync(new FileStream(filePath, FileMode.Create));
-                }
+                string uniqueFileName = ProcessUploadedFile(model);
                 Employee newEmployee = new Employee();
                 newEmployee.Name = model.Name;
                 newEmployee.Email = model.Email;
@@ -120,6 +113,59 @@ namespace EmployeeManagement.Controllers
                 return RedirectToAction("viewmodeldetails", new { id = newEmployee.Id });//to test AddSindleton service injection
         }
             return View();
+        }
+
+        [HttpGet]
+        public ViewResult Edit(int id)
+        {
+            Employee employee = _employeeRepository.GetEmployee(id);
+            EmployeeEditViewModel employeeEditViewModel = new EmployeeEditViewModel
+            {
+                Id = employee.Id,
+                Department=employee.Department,
+                Name=employee.Name,
+                Email=employee.Email,
+                ExistingPhotoPath=employee.Photopath
+            };
+            return View(employeeEditViewModel);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(EmployeeEditViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                Employee employee = _employeeRepository.GetEmployee(model.Id);
+                employee.Name = model.Name;
+                employee.Department = model.Department;
+                employee.Email = model.Email;
+                string uniqueFileName = model.ExistingPhotoPath;
+                if (model.Photo != null)
+                {
+                   uniqueFileName = ProcessUploadedFile(model);
+                }
+                Employee newEmployee = new Employee();
+                newEmployee.Name = model.Name;
+                newEmployee.Email = model.Email;
+                newEmployee.Department = model.Department;
+                newEmployee.Photopath = uniqueFileName;
+                _employeeRepository.UpdateEmployee(newEmployee);
+                return RedirectToAction("viewmodeldetails", new { id = employee.Id });//to test AddSindleton service injection
+            }
+            return View();
+        }
+
+        private string ProcessUploadedFile(EmployeeCreateViewModel model)
+        {
+            string uniqueFileName = null;
+            if (model.Photo != null)
+            {
+                string uploadFolder = Path.Combine(_hostingEnvironment.WebRootPath, "images");
+                uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Photo.FileName;
+                string filePath = Path.Combine(uploadFolder, uniqueFileName);
+                model.Photo.CopyToAsync(new FileStream(filePath, FileMode.Create));
+            }
+            return uniqueFileName;
         }
     }
 } 
