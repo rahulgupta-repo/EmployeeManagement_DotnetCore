@@ -82,9 +82,15 @@ namespace EmployeeManagement.Controllers
         //[Route("{id?}")]
         public ViewResult ViewModelDetails(int? id)
         {
+            Employee employee = _employeeRepository.GetEmployee(id.Value);
+            if(employee == null)
+            {
+                Response.StatusCode = 404;
+                return View("EmployeeNotFound", id.Value);
+            }
             HomeViewModelDetails homeViewModelDetails = new HomeViewModelDetails()
             {
-                Employee = _employeeRepository.GetEmployee(id ?? 1), //if null use default 1
+                Employee = employee,//_employeeRepository.GetEmployee(id ?? 1), //if null use default 1
                 PageTitle = "View Model Details"
             };
             //Employee empModel = _employeeRepository.GetEmployee(3);
@@ -109,9 +115,9 @@ namespace EmployeeManagement.Controllers
                 newEmployee.Email = model.Email;
                 newEmployee.Department = model.Department;
                 newEmployee.Photopath = uniqueFileName;
-                _employeeRepository.AddEmployee(newEmployee);            
+                _employeeRepository.AddEmployee(newEmployee);
                 return RedirectToAction("viewmodeldetails", new { id = newEmployee.Id });//to test AddSindleton service injection
-        }
+            }
             return View();
         }
 
@@ -122,10 +128,10 @@ namespace EmployeeManagement.Controllers
             EmployeeEditViewModel employeeEditViewModel = new EmployeeEditViewModel
             {
                 Id = employee.Id,
-                Department=employee.Department,
-                Name=employee.Name,
-                Email=employee.Email,
-                ExistingPhotoPath=employee.Photopath
+                Department = employee.Department,
+                Name = employee.Name,
+                Email = employee.Email,
+                ExistingPhotoPath = employee.Photopath
             };
             return View(employeeEditViewModel);
         }
@@ -139,17 +145,16 @@ namespace EmployeeManagement.Controllers
                 employee.Name = model.Name;
                 employee.Department = model.Department;
                 employee.Email = model.Email;
-                string uniqueFileName = model.ExistingPhotoPath;
                 if (model.Photo != null)
                 {
-                   uniqueFileName = ProcessUploadedFile(model);
+                    if (model.ExistingPhotoPath != null)
+                    {
+                        string filepath = Path.Combine(_hostingEnvironment.WebRootPath, "images", model.ExistingPhotoPath);
+                        System.IO.File.Delete(filepath);
+                    }
+                    employee.Photopath = ProcessUploadedFile(model);
                 }
-                Employee newEmployee = new Employee();
-                newEmployee.Name = model.Name;
-                newEmployee.Email = model.Email;
-                newEmployee.Department = model.Department;
-                newEmployee.Photopath = uniqueFileName;
-                _employeeRepository.UpdateEmployee(newEmployee);
+                _employeeRepository.UpdateEmployee(employee);
                 return RedirectToAction("viewmodeldetails", new { id = employee.Id });//to test AddSindleton service injection
             }
             return View();
@@ -163,9 +168,12 @@ namespace EmployeeManagement.Controllers
                 string uploadFolder = Path.Combine(_hostingEnvironment.WebRootPath, "images");
                 uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Photo.FileName;
                 string filePath = Path.Combine(uploadFolder, uniqueFileName);
-                model.Photo.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                using (var fileStream = new FileStream(filePath, FileMode.Create)) 
+                {
+                    model.Photo.CopyTo(fileStream); 
+                }
             }
             return uniqueFileName;
-        }
+        } 
     }
 } 

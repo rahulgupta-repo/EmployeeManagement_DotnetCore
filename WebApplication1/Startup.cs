@@ -38,6 +38,12 @@ namespace WebApplication1
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                //app.UseStatusCodePages();// Will show the exception in plain page
+                //app.UseStatusCodePagesWithRedirects("/Error/{0}");// Return our own custom view and a ridirect is issued to target route responses will have 200 ok codes not recommended by developer as symantecally incorrect while error.
+                app.UseStatusCodePagesWithReExecute("/Error/{0}");//Preferred Custom View less complex routing with desired status code in client browser.
+            }
 
             app.UseStaticFiles();
             app.UseMvcWithDefaultRoute(); // Enables Default routing to our controller methods which seems like below config
