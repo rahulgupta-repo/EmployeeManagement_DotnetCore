@@ -82,6 +82,7 @@ namespace EmployeeManagement.Controllers
         //[Route("{id?}")]
         public ViewResult ViewModelDetails(int? id)
         {
+            //throw new Exception("Unhandled Exception Occured");
             Employee employee = _employeeRepository.GetEmployee(id.Value);
             if(employee == null)
             {
