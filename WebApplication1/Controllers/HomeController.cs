@@ -82,7 +82,7 @@ namespace EmployeeManagement.Controllers
         //[Route("{id?}")]
         public ViewResult ViewModelDetails(int? id)
         {
-            //throw new Exception("Unhandled Exception Occured");
+            throw new Exception("Unhandled Exception Occured");// to demonstrate unhandled exception
             Employee employee = _employeeRepository.GetEmployee(id.Value);
             if(employee == null)
             {
