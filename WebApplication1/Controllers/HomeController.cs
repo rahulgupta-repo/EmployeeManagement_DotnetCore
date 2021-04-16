@@ -2,6 +2,7 @@
 using EmployeeManagement.ViewModels;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 
@@ -12,12 +13,13 @@ namespace EmployeeManagement.Controllers
     {
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IHostingEnvironment _hostingEnvironment;
-
+        private readonly ILogger logger;
         public HomeController(IEmployeeRepository employeeRepository,
-            IHostingEnvironment hostingEnvironment)
+            IHostingEnvironment hostingEnvironment, ILogger<HomeController> logger)
         {
             _employeeRepository = employeeRepository;
             _hostingEnvironment = hostingEnvironment;
+            this.logger = logger;
         }
 
         /* public JsonResult Index()
@@ -82,7 +84,13 @@ namespace EmployeeManagement.Controllers
         //[Route("{id?}")]
         public ViewResult ViewModelDetails(int? id)
         {
-            throw new Exception("Unhandled Exception Occured");// to demonstrate unhandled exception
+            //throw new Exception("Unhandled Exception Occured");// to demonstrate unhandled exception
+            logger.LogTrace("Trace Log");
+            logger.LogDebug("Debug Log");
+            logger.LogInformation("Info Log");
+            logger.LogWarning("Warning Log");
+            logger.LogError("Error Log");
+            logger.LogCritical("Critical Log");
             Employee employee = _employeeRepository.GetEmployee(id.Value);
             if(employee == null)
             {
